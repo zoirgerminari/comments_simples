@@ -1,0 +1,7 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+[dev]
+  command = "echo 'Servidor de desenvolvimento iniciado'"
+  port = 8888
