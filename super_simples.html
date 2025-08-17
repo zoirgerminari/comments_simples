@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Comentários - SIMPLES</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .success {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4caf50;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💬 Sistema de Comentários</h1>
+        <p>Deixe seu comentário! Ele será salvo no painel administrativo do Netlify.</p>
+        
+        <!-- FORMULÁRIO NETLIFY PURO - SEM JAVASCRIPT -->
+        <form name="comentarios" method="POST" data-netlify="true" data-netlify-honeypot="bot-field">
+            <input type="hidden" name="form-name" value="comentarios" />
+            
+            <!-- Anti-spam honeypot -->
+            <p class="hidden">
+                <label>Não preencha este campo: <input name="bot-field" /></label>
+            </p>
+            
+            <div class="form-group">
+                <label for="nome">Seu Nome:</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Seu Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="comentario">Seu Comentário:</label>
+                <textarea id="comentario" name="comentario" rows="5" required 
+                         placeholder="Digite seu comentário aqui..."></textarea>
+            </div>
+            
+            <button type="submit">🚀 Enviar Comentário</button>
+        </form>
+        
+        <div style="margin-top: 30px; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+            <h3>ℹ️ Como funciona:</h3>
+            <ul style="text-align: left;">
+                <li>✅ <strong>Você comenta</strong> → Salva automaticamente no Netlify</li>
+                <li>📊 <strong>Painel admin</strong> → Site → Forms → "comentarios"</li>
+                <li>📧 <strong>Notificações</strong> → Configure para receber por email</li>
+                <li>🛡️ <strong>Anti-spam</strong> → Proteção automática do Netlify</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

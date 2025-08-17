@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Comentários</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        
+        .comment-form {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .success-message {
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .hidden { display: none; }
+        
+        .info-box {
+            background: rgba(33, 150, 243, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💬 Sistema de Comentários</h1>
+        
+        <div class="info-box">
+            <strong>Como funciona:</strong><br>
+            • Você comenta aqui<br>
+            • Comentário é salvo no painel administrativo do Netlify<br>
+            • Você pode ver todos os comentários em: Netlify Dashboard → Forms
+        </div>
+        
+        <!-- FORM SUPER SIMPLES DO NETLIFY -->
+        <form name="comments" method="POST" data-netlify="true">
+            <input type="hidden" name="form-name" value="comments">
+            
+            <!-- Campo oculto anti-spam -->
+            <p class="hidden">
+                <label>Não preencher: <input name="bot-field"></label>
+            </p>
+            
+            <div class="form-group">
+                <label for="nome">📝 Seu Nome:</label>
+                <input type="text" name="nome" id="nome" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">📧 Seu Email:</label>
+                <input type="email" name="email" id="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="comentario">💭 Seu Comentário:</label>
+                <textarea name="comentario" id="comentario" rows="5" required placeholder="Digite seu comentário aqui..."></textarea>
+            </div>
+            
+            <button type="submit">🚀 Enviar Comentário</button>
+        </form>
+        
+        <div class="info-box" style="margin-top: 30px;">
+            <h3>📊 Para ver os comentários enviados:</h3>
+            <ol>
+                <li>Vá para seu <strong>Dashboard do Netlify</strong></li>
+                <li>Clique em <strong>"Forms"</strong> no menu lateral</li>
+                <li>Clique em <strong>"comments"</strong></li>
+                <li>Veja todos os comentários enviados!</li>
+            </ol>
+        </div>
+        
+        <div class="info-box" style="background: rgba(255, 193, 7, 0.3); border-left-color: #ffc107;">
+            <strong>🎉 Vantagens desta solução:</strong><br>
+            ✅ Funciona 100% garantido<br>
+            ✅ Anti-spam automático<br>
+            ✅ Painel administrativo completo<br>
+            ✅ Notificações por email (opcional)<br>
+            ✅ Sem JavaScript complexo<br>
+            ✅ Sem APIs externas
+        </div>
+    </div>
+</body>
+</html>

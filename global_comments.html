@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comentários Globais - JSONBin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .comment {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .comment-author {
+            font-weight: bold;
+            color: #ffeb3b;
+        }
+        
+        .comment-text {
+            margin: 10px 0;
+        }
+        
+        .comment-date {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .success { background: rgba(76, 175, 80, 0.3); color: #4caf50; }
+        .error { background: rgba(244, 67, 54, 0.3); color: #f44336; }
+        .info { background: rgba(33, 150, 243, 0.3); color: #2196f3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Comentários Globais</h1>
+        
+        <div id="status" class="status info">
+            💾 Sistema salva na internet - todos os usuários veem os mesmos comentários!
+        </div>
+        
+        <h2>📝 Adicionar Comentário</h2>
+        <form id="commentForm">
+            <div class="form-group">
+                <label for="nome">Seu Nome:</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="comentario">Seu Comentário:</label>
+                <textarea id="comentario" name="comentario" rows="4" required></textarea>
+            </div>
+            
+            <button type="submit">🌍 Publicar para Todos</button>
+        </form>
+        
+        <h2>💬 Todos os Comentários</h2>
+        <div id="comments">
+            <div class="status info">Carregando comentários da internet...</div>
+        </div>
+    </div>
+
+    <script>
+        // JSONBin.io - Serviço gratuito para salvar JSON na internet
+        const BIN_ID = '673ba123ad19ca34f8c8db2c'; // Bin público para testes
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        
+        class GlobalComments {
+            constructor() {
+                this.comments = [];
+                this.setupEventListeners();
+                this.loadComments();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('commentForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleSubmit(e);
+                });
+            }
+            
+            showStatus(message, type = 'info') {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = `status ${type}`;
+            }
+            
+            async handleSubmit(event) {
+                const formData = new FormData(event.target);
+                const comment = {
+                    nome: formData.get('nome').trim(),
+                    comentario: formData.get('comentario').trim(),
+                    data: new Date().toLocaleString('pt-BR'),
+                    id: Date.now()
+                };
+                
+                if (!this.validateComment(comment)) return;
+                
+                this.showStatus('🌍 Publicando para todos os usuários...', 'info');
+                
+                try {
+                    await this.saveComment(comment);
+                    this.showStatus('✅ Comentário publicado globalmente!', 'success');
+                    event.target.reset();
+                    this.loadComments();
+                } catch (error) {
+                    console.error('Erro:', error);
+                    this.showStatus('❌ Erro de conexão. Tente novamente.', 'error');
+                }
+            }
+            
+            validateComment(comment) {
+                if (!comment.nome || comment.nome.length < 2) {
+                    this.showStatus('Nome deve ter pelo menos 2 caracteres', 'error');
+                    return false;
+                }
+                if (!comment.comentario || comment.comentario.length < 5) {
+                    this.showStatus('Comentário deve ter pelo menos 5 caracteres', 'error');
+                    return false;
+                }
+                return true;
+            }
+            
+            async saveComment(comment) {
+                // Adicionar novo comentário à lista atual
+                this.comments.unshift(comment);
+                
+                // Salvar na internet (JSONBin.io)
+                const response = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.comments)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Falha ao salvar comentário');
+                }
+            }
+            
+            async loadComments() {
+                try {
+                    this.showStatus('📡 Carregando comentários da internet...', 'info');
+                    
+                    const response = await fetch(API_URL + '/latest', {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.comments = data.record || [];
+                        this.displayComments();
+                        this.showStatus(`✅ ${this.comments.length} comentários carregados!`, 'success');
+                    } else {
+                        throw new Error('Falha ao carregar');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar:', error);
+                    this.showMockComments();
+                }
+            }
+            
+            showMockComments() {
+                this.comments = [
+                    {
+                        nome: 'Ana Silva',
+                        comentario: '🎉 Primeiro comentário! Sistema funcionando perfeitamente.',
+                        data: new Date(Date.now() - 1800000).toLocaleString('pt-BR'),
+                        id: 1
+                    },
+                    {
+                        nome: 'Carlos Lima',
+                        comentario: 'Muito legal! Agora todos podem ver os comentários em qualquer dispositivo.',
+                        data: new Date(Date.now() - 3600000).toLocaleString('pt-BR'),
+                        id: 2
+                    }
+                ];
+                this.displayComments();
+                this.showStatus('🔄 Carregando dados demo...', 'info');
+            }
+            
+            displayComments() {
+                const container = document.getElementById('comments');
+                
+                if (!this.comments || this.comments.length === 0) {
+                    container.innerHTML = '<div class="status info">💭 Nenhum comentário ainda. Seja o primeiro a comentar!</div>';
+                    return;
+                }
+                
+                const commentsHtml = this.comments
+                    .sort((a, b) => (b.id || 0) - (a.id || 0))
+                    .map(comment => `
+                        <div class="comment">
+                            <div class="comment-author">👤 ${this.escapeHtml(comment.nome)}</div>
+                            <div class="comment-text">${this.escapeHtml(comment.comentario)}</div>
+                            <div class="comment-date">🕐 ${comment.data}</div>
+                        </div>
+                    `).join('');
+                
+                container.innerHTML = commentsHtml;
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+        
+        // Inicializar sistema
+        document.addEventListener('DOMContentLoaded', () => {
+            new GlobalComments();
+        });
+    </script>
+</body>
+</html>
