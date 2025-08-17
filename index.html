@@ -127,6 +127,10 @@
             <div>Mode: <span id="currentMode"></span></div>
             <div>API Base: <span id="apiBase"></span></div>
             <div>LocalStorage: <span id="localStorageInfo"></span></div>
+            <button onclick="showStoredComments()" style="margin-top: 10px; padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                🔍 Ver Comentários Salvos
+            </button>
+            <div id="storedCommentsDisplay" style="margin-top: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; display: none;"></div>
         </div>
     </div>
 
@@ -402,6 +406,34 @@
         document.addEventListener('DOMContentLoaded', () => {
             new SimpleCommentsTest();
         });
+
+        // 🔍 Função para mostrar comentários salvos
+        function showStoredComments() {
+            const stored = localStorage.getItem('test-comments');
+            const display = document.getElementById('storedCommentsDisplay');
+            
+            if (stored) {
+                try {
+                    const comments = JSON.parse(stored);
+                    display.innerHTML = `
+                        <strong>📝 Comentários no localStorage (${comments.length}):</strong><br><br>
+                        ${comments.map((comment, index) => `
+                            <div style="border-left: 2px solid #007bff; padding-left: 8px; margin: 5px 0;">
+                                <strong>${index + 1}.</strong> <em>${comment.nome}</em><br>
+                                "${comment.comentario}"<br>
+                                <small>${new Date(comment.data).toLocaleString()}</small>
+                            </div>
+                        `).join('')}
+                    `;
+                } catch (e) {
+                    display.innerHTML = '<strong>❌ Erro ao ler dados:</strong> ' + stored;
+                }
+            } else {
+                display.innerHTML = '<strong>💭 Nenhum comentário salvo ainda.</strong>';
+            }
+            
+            display.style.display = display.style.display === 'none' ? 'block' : 'none';
+        }
     </script>
 </body>
 </html>
