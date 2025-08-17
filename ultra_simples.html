@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comentários Simples</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        input:focus, textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        
+        button {
+            width: 100%;
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .comments {
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .comment {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .comment-name {
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 8px;
+        }
+        
+        .comment-text {
+            color: #444;
+            line-height: 1.5;
+        }
+        
+        .comment-date {
+            font-size: 11px;
+            color: #999;
+            margin-top: 8px;
+        }
+        
+        .no-comments {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 30px;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💬 Comentários</h1>
+        
+        <div id="status"></div>
+        
+        <form id="commentForm">
+            <div class="form-group">
+                <label for="name">Nome:</label>
+                <input type="text" id="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="comment">Comentário:</label>
+                <textarea id="comment" required placeholder="Escreva seu comentário..."></textarea>
+            </div>
+            
+            <button type="submit">Enviar</button>
+        </form>
+        
+        <div class="comments">
+            <div id="comments-list">
+                <div class="no-comments">Carregando comentários...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Detectar se está online (Netlify) ou local
+        const isOnline = window.location.protocol === 'https:' || window.location.hostname.includes('netlify');
+        const BIN_ID = '673ba123ad19ca34f8c8db2c';
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        
+        let comments = [];
+        
+        // Carregar comentários quando a página carrega
+        window.onload = function() {
+            loadComments();
+            
+            document.getElementById('commentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addComment();
+            });
+        };
+        
+        // Mostrar status
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // Carregar comentários da internet OU localStorage
+        async function loadComments() {
+            if (isOnline) {
+                // Online: tentar carregar da internet
+                try {
+                    showStatus('Carregando comentários da internet...', 'info');
+                    
+                    const response = await fetch(API_URL + '/latest');
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        comments = data.record || [];
+                        displayComments();
+                        showStatus('', '');
+                        return;
+                    }
+                } catch (error) {
+                    console.log('Erro online, usando localStorage');
+                }
+            }
+            
+            // Local OU falha online: usar localStorage
+            const stored = localStorage.getItem('comments-ultra');
+            if (stored) {
+                comments = JSON.parse(stored);
+            } else {
+                // Comentários de exemplo para começar
+                comments = [
+                    {
+                        name: 'João',
+                        text: 'Primeiro comentário de teste!',
+                        date: new Date().toLocaleString('pt-BR'),
+                        id: 1
+                    }
+                ];
+                localStorage.setItem('comments-ultra', JSON.stringify(comments));
+            }
+            
+            displayComments();
+            showStatus('', '');
+        }
+        
+        // Adicionar novo comentário
+        async function addComment() {
+            const name = document.getElementById('name').value.trim();
+            const commentText = document.getElementById('comment').value.trim();
+            
+            if (!name || !commentText) {
+                showStatus('Preencha todos os campos', 'error');
+                return;
+            }
+            
+            if (name.length < 2) {
+                showStatus('Nome deve ter pelo menos 2 caracteres', 'error');
+                return;
+            }
+            
+            if (commentText.length < 3) {
+                showStatus('Comentário deve ter pelo menos 3 caracteres', 'error');
+                return;
+            }
+            
+            showStatus('Enviando...', 'info');
+            
+            const newComment = {
+                name: name,
+                text: commentText,
+                date: new Date().toLocaleString('pt-BR'),
+                id: Date.now()
+            };
+            
+            // Adicionar à lista local
+            comments.unshift(newComment);
+            
+            if (isOnline) {
+                // Online: tentar salvar na internet
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(comments)
+                    });
+                    
+                    if (response.ok) {
+                        showStatus('✅ Comentário salvo na internet!', 'success');
+                    } else {
+                        throw new Error('Erro API');
+                    }
+                } catch (error) {
+                    console.log('Erro online, salvando local');
+                    showStatus('✅ Comentário salvo localmente!', 'success');
+                    localStorage.setItem('comments-ultra', JSON.stringify(comments));
+                }
+            } else {
+                // Local: salvar no localStorage
+                localStorage.setItem('comments-ultra', JSON.stringify(comments));
+                showStatus('✅ Comentário salvo localmente!', 'success');
+            }
+            
+            // Limpar formulário
+            document.getElementById('name').value = '';
+            document.getElementById('comment').value = '';
+            
+            // Atualizar lista
+            displayComments();
+        }
+        
+        // Mostrar comentários
+        function displayComments() {
+            const commentsList = document.getElementById('comments-list');
+            
+            if (comments.length === 0) {
+                commentsList.innerHTML = '<div class="no-comments">Ainda não há comentários. Seja o primeiro!</div>';
+                return;
+            }
+            
+            commentsList.innerHTML = comments
+                .sort((a, b) => (b.id || 0) - (a.id || 0))
+                .map(comment => `
+                    <div class="comment">
+                        <div class="comment-name">${escapeHtml(comment.name)}</div>
+                        <div class="comment-text">${escapeHtml(comment.text)}</div>
+                        <div class="comment-date">${comment.date}</div>
+                    </div>
+                `).join('');
+        }
+        
+        // Escapar HTML para segurança
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
