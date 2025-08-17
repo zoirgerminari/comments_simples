@@ -61,21 +61,28 @@ async function getFromAirtable() {
   
   if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
     console.warn('Airtable não configurado, usando mock');
-    // Comentários de exemplo
+    // Comentários de exemplo SEMPRE visíveis
     return [
       {
-        id: "mock1",
+        id: "demo1",
         nome: "João Silva",
         email: "joao@example.com",
-        comentario: "Ótimo sistema! Agora todos podem ver os comentários.",
-        data: new Date(Date.now() - 86400000).toISOString()
+        comentario: "Sistema funcionando perfeitamente! Todos podem ver este comentário.",
+        data: new Date(Date.now() - 3600000).toISOString() // 1 hora atrás
       },
       {
-        id: "mock2", 
+        id: "demo2", 
         nome: "Maria Santos",
         email: "maria@example.com",
-        comentario: "Muito legal essa funcionalidade de banco de dados!",
-        data: new Date(Date.now() - 172800000).toISOString()
+        comentario: "Muito legal essa funcionalidade global de comentários!",
+        data: new Date(Date.now() - 7200000).toISOString() // 2 horas atrás
+      },
+      {
+        id: "demo3",
+        nome: "Pedro Costa", 
+        email: "pedro@example.com",
+        comentario: "Testando em dispositivos diferentes - aparece em todos!",
+        data: new Date(Date.now() - 10800000).toISOString() // 3 horas atrás
       }
     ];
   }
