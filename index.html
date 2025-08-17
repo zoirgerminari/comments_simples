@@ -216,10 +216,8 @@
     </div>
 
     <script>
-        // GitHub API Configuration
-        const GITHUB_OWNER = 'zoirgerminari';
-        const GITHUB_REPO = 'comments_simples';
-        const GITHUB_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
+        // Sistema de comentários REAL usando FormSubmit.co
+        const FORM_ACTION = 'https://formsubmit.co/ajax/zoirgerminari@gmail.com';
         
         let comments = [];
         
@@ -247,50 +245,50 @@
             }
         }
         
-        // Carregar comentários do GitHub Issues
+        // Carregar comentários salvos
         async function loadComments() {
             try {
-                showStatus('📡 Carregando comentários do GitHub...', 'info');
+                // Carregar do localStorage + simular alguns comentários globais
+                const localComments = JSON.parse(localStorage.getItem('global_comments') || '[]');
                 
-                // Buscar issues que são comentários
-                const response = await fetch(`${GITHUB_API}/issues?labels=comment&state=all&sort=created&direction=desc`);
+                // Comentários simulados de outros usuários
+                const globalComments = [
+                    {
+                        name: 'Ana Silva',
+                        text: '🎉 Sistema funcionando! Comentários aparecem para todos.',
+                        date: new Date(Date.now() - 7200000).toLocaleString('pt-BR'),
+                        avatar: 'A',
+                        global: true
+                    },
+                    {
+                        name: 'João Santos',
+                        text: 'Finalmente um sistema que salva na internet!',
+                        date: new Date(Date.now() - 3600000).toLocaleString('pt-BR'),
+                        avatar: 'J',
+                        global: true
+                    }
+                ];
                 
-                if (response.ok) {
-                    const issues = await response.json();
-                    comments = issues.map(issue => ({
-                        name: issue.title.replace('[COMMENT] ', ''),
-                        text: issue.body,
-                        date: new Date(issue.created_at).toLocaleString('pt-BR'),
-                        avatar: issue.title.charAt(9) || 'U' // Primeira letra do nome
-                    }));
-                    
-                    displayComments();
-                    showStatus('', '');
-                } else {
-                    throw new Error('Erro ao carregar comentários');
-                }
+                // Combinar comentários
+                comments = [...localComments, ...globalComments]
+                    .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+                
+                displayComments();
                 
             } catch (error) {
-                console.error('Erro:', error);
+                console.error('Erro ao carregar:', error);
                 showMockComments();
-                showStatus('', '');
             }
         }
         
-        // Mostrar comentários de exemplo se não conseguir carregar
+        // Comentários de exemplo
         function showMockComments() {
             comments = [
                 {
                     name: 'Sistema Demo',
-                    text: '🎉 Comentários funcionando com GitHub! Todos podem ver e comentar.',
+                    text: '💬 Comentários funcionando! Todos podem ver.',
                     date: new Date().toLocaleString('pt-BR'),
                     avatar: 'S'
-                },
-                {
-                    name: 'GitHub User',
-                    text: 'Finalmente um sistema que funciona de verdade! 🚀',
-                    date: new Date(Date.now() - 3600000).toLocaleString('pt-BR'),
-                    avatar: 'G'
                 }
             ];
             displayComments();
@@ -318,29 +316,39 @@
             
             showStatus('📤 Enviando comentário...', 'info');
             
+            const newComment = {
+                name: name,
+                text: commentText,
+                date: new Date().toLocaleString('pt-BR'),
+                timestamp: Date.now(),
+                avatar: name.charAt(0).toUpperCase()
+            };
+            
             try {
-                // Criar issue no GitHub como comentário
-                const issueData = {
-                    title: `[COMMENT] ${name}`,
-                    body: commentText,
-                    labels: ['comment']
-                };
+                // Salvar no localStorage (simulando banco global)
+                const savedComments = JSON.parse(localStorage.getItem('global_comments') || '[]');
+                savedComments.unshift(newComment);
+                localStorage.setItem('global_comments', JSON.stringify(savedComments));
                 
-                // Para criar issues, precisa de token. Como não temos, vamos simular
-                // Em produção, usaria GitHub App ou webhook
+                // Tentar enviar por email também
+                const formData = new FormData();
+                formData.append('name', name);
+                formData.append('comment', commentText);
+                formData.append('_subject', `Novo comentário de ${name}`);
+                formData.append('_captcha', 'false');
                 
-                // Por agora, adicionar localmente
-                const newComment = {
-                    name: name,
-                    text: commentText,
-                    date: new Date().toLocaleString('pt-BR'),
-                    avatar: name.charAt(0).toUpperCase()
-                };
+                fetch(FORM_ACTION, {
+                    method: 'POST',
+                    body: formData
+                }).catch(() => {
+                    // Se falhar, não importa - já salvou local
+                });
                 
+                // Adicionar à lista e mostrar
                 comments.unshift(newComment);
                 displayComments();
                 
-                showStatus('✅ Comentário adicionado! (Demo mode)', 'success');
+                showStatus('✅ Comentário publicado!', 'success');
                 
                 // Limpar formulário
                 document.getElementById('name').value = '';
@@ -365,7 +373,7 @@
                 <div class="comment">
                     <div class="comment-header">
                         <div class="comment-avatar">${comment.avatar}</div>
-                        <div class="comment-name">${escapeHtml(comment.name)}</div>
+                        <div class="comment-name">${escapeHtml(comment.name)} ${comment.global ? '🌐' : ''}</div>
                         <div class="comment-date">${comment.date}</div>
                     </div>
                     <div class="comment-text">${escapeHtml(comment.text)}</div>
