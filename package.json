@@ -2,15 +2,11 @@
   "name": "comments-simples",
   "version": "1.0.0",
   "description": "Sistema de comentários simples com suporte a Netlify Functions",
-  "main": "comment_simples.html",
+  "main": "index.html",
   "scripts": {
-    "build": "echo 'No build step required'",
-    "dev": "netlify dev"
+    "build": "echo 'No build step required'"
   },
   "keywords": ["comentarios", "netlify", "javascript", "html"],
-  "author": "Seu Nome",
-  "license": "MIT",
-  "devDependencies": {
-    "netlify-cli": "^17.0.0"
-  }
+  "author": "zoirgerminari",
+  "license": "MIT"
 }

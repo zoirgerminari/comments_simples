@@ -1,7 +1,8 @@
 [build]
-  functions = "netlify/functions"
   publish = "."
+  functions = "netlify/functions"
 
-[dev]
-  command = "echo 'Servidor de desenvolvimento iniciado'"
-  port = 8888
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
