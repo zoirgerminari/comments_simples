@@ -1,12 +1,21 @@
 {
   "name": "comments-simples",
-  "version": "1.0.0",
-  "description": "Sistema de comentários simples com suporte a Netlify Functions",
+  "version": "2.0.0",
+  "description": "Sistema de comentários com Neon Database e Netlify",
+  "type": "module",
   "main": "index.html",
   "scripts": {
-    "build": "echo 'No build step required'"
+    "build": "echo 'No build step required'",
+    "dev": "netlify dev",
+    "deploy": "netlify deploy --prod"
   },
-  "keywords": ["comentarios", "netlify", "javascript", "html"],
+  "dependencies": {
+    "@neondatabase/serverless": "^0.9.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "keywords": ["comentarios", "netlify", "neon", "database", "postgresql"],
   "author": "zoirgerminari",
   "license": "MIT"
 }
